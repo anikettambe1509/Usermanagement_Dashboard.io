@@ -28,3 +28,4 @@ export const deleteUser = (id) => {
   const updatedUsers = users.filter((user) => user.id !== id);
   localStorage.setItem('users', JSON.stringify(updatedUsers));
 };
+

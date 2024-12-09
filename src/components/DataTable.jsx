@@ -1,3 +1,5 @@
+import React from 'react';
+
 const DataTable = ({ data }) => (
   <table className="w-full border-collapse border border-gray-300">
     <thead>

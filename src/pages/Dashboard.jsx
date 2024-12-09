@@ -1,102 +1,185 @@
-// import React from 'react';
-// import LineChart from '../components/LineChart';
+// import React, { useState, useEffect } from 'react';
+// import { Chart } from 'chart.js/auto';
+// import { Pie, Bar } from 'react-chartjs-2';
+// import { getUsers } from '../utils/api';
 
 // const Dashboard = () => {
-//   const chartData = {
-//     labels: ['January', 'February', 'March', 'April', 'May'],
-//     values: [100, 200, 150, 300, 250],
+//   const [users, setUsers] = useState([]);
+
+//   useEffect(() => {
+//     setUsers(getUsers());
+//   }, []);
+
+//   const totalUsers = users.length;
+//   const activeUsers = users.filter(user => user.status === 'Active').length;
+//   const inactiveUsers = totalUsers - activeUsers;
+
+//   // Dummy monthly data (replace with API or logic to fetch monthly stats)
+//   const months = ['January', 'February', 'March', 'April', 'May', 'June'];
+//   const addedUsersMonthly = [20, 15, 25, 10, 30, 12];
+//   const inactiveUsersMonthly = [5, 3, 8, 2, 10, 1];
+
+//   const pieChartData = {
+//     labels: ['Active', 'Inactive'],
+//     datasets: [
+//       {
+//         data: [activeUsers, inactiveUsers],
+//         backgroundColor: ['#4CAF50', '#F44336'], // Green for Active, Red for Inactive
+//       },
+//     ],
+//   };
+
+//   const barChartData = {
+//     labels: months,
+//     datasets: [
+//       {
+//         label: 'Users Added',
+//         data: addedUsersMonthly,
+//         backgroundColor: '#4CAF50',
+//       },
+//       {
+//         label: 'Users Inactive',
+//         data: inactiveUsersMonthly,
+//         backgroundColor: '#F44336',
+//       },
+//     ],
 //   };
 
 //   return (
-//     <div className="ml-64 p-4">
-//       <h2 className="text-2xl font-bold mb-4">Dashboard</h2>
-//       <LineChart data={chartData} />
+//     <div className="p-6 bg-gray-100 min-h-screen">
+//       <h1 className="text-4xl font-bold text-gray-800 mb-6">Dashboard</h1>
+
+//       {/* User Summary */}
+//       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+//         <div className="bg-white p-4 rounded shadow-md">
+//           <h2 className="text-2xl font-semibold text-gray-700">Total Users</h2>
+//           <p className="text-4xl font-bold text-blue-500">{totalUsers}</p>
+//         </div>
+//         <div className="bg-white p-4 rounded shadow-md">
+//           <h2 className="text-2xl font-semibold text-gray-700">Active Users</h2>
+//           <p className="text-4xl font-bold text-green-500">{activeUsers}</p>
+//         </div>
+//         <div className="bg-white p-4 rounded shadow-md">
+//           <h2 className="text-2xl font-semibold text-gray-700">Inactive Users</h2>
+//           <p className="text-4xl font-bold text-red-500">{inactiveUsers}</p>
+//         </div>
+//       </div>
+
+//       {/* Charts Section */}
+//       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+//         {/* Pie Chart */}
+//         <div className="bg-white p-6 rounded shadow-md">
+//           <h2 className="text-xl font-semibold text-gray-700 mb-4">User Status Distribution</h2>
+//           <Pie data={pieChartData} />
+//         </div>
+
+//         {/* Bar Chart */}
+//         <div className="bg-white p-6 rounded shadow-md">
+//           <h2 className="text-xl font-semibold text-gray-700 mb-4">Monthly User Activity</h2>
+//           <Bar data={barChartData} />
+//         </div>
+//       </div>
 //     </div>
 //   );
 // };
 
 // export default Dashboard;
 
-import React from 'react';
-import LineChart from '../components/LineChart';
-import BarChart from '../components/BarChart';
-import PieChart from '../components/PieChart';
+
+
+
+import React, { useState, useEffect } from 'react';
+import { Chart } from 'chart.js/auto';
+import { Pie, Bar } from 'react-chartjs-2';
+import { getUsers } from '../utils/api';
 
 const Dashboard = () => {
-  // Example data for charts
-  const lineChartData = {
-    labels: ['January', 'February', 'March', 'April', 'May'],
-    values: [100, 200, 150, 300, 250],
-  };
+  const [users, setUsers] = useState([]);
+
+  useEffect(() => {
+    const fetchUsers = async () => {
+      try {
+        const data = await getUsers(); // Fetch data from API
+        setUsers(data);
+      } catch (error) {
+        console.error('Failed to fetch users:', error);
+      }
+    };
+
+    fetchUsers();
+  }, []);
+
+  const totalUsers = users.length;
+  const activeUsers = users.filter(user => user.status === 'Active').length;
+  const inactiveUsers = totalUsers - activeUsers;
+
+  // Dummy monthly data mapping (replace with actual API data logic)
+  const months = ['Jan', 'Feb', 'March', 'April', 'May', 'June', 'July', 'Aug', 'Sept', 'Oct', 'Nov', 'Dec'];
+
+  // Example grouping users by month (replace with your actual API response logic)
+  const monthlyData = months.map((month, index) => {
+    const active = users.filter(
+      user => user.status === 'Active' && new Date(user.createdAt).getMonth() === index
+    ).length;
+    const inactive = users.filter(
+      user => user.status !== 'Active' && new Date(user.createdAt).getMonth() === index
+    ).length;
+    return { month, active, inactive };
+  });
 
   const barChartData = {
-    labels: ['Electronics', 'Fashion', 'Groceries', 'Furniture'],
-    values: [500, 300, 400, 200],
+    labels: months,
+    datasets: [
+      {
+        label: 'Active Users',
+        data: monthlyData.map(data => data.active),
+        backgroundColor: '#4CAF50', // Green for active users
+      },
+      {
+        label: 'Inactive Users',
+        data: monthlyData.map(data => data.inactive),
+        backgroundColor: '#F44336', // Red for inactive users
+      },
+    ],
   };
 
   const pieChartData = {
-    labels: ['Male', 'Female', 'Other'],
-    values: [60, 35, 5],
+    labels: ['Active', 'Inactive'],
+    datasets: [
+      {
+        data: [activeUsers, inactiveUsers],
+        backgroundColor: ['#4CAF50', '#F44336'], // Green for Active, Red for Inactive
+      },
+    ],
   };
 
   return (
     <div className="p-6 bg-gray-100 min-h-screen">
-      <h2 className="text-3xl font-bold mb-6 ">Dashboard</h2>
+      <h1 className="text-4xl font-bold text-gray-800 mb-6">Dashboard</h1>
 
-      {/* KPI Section */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
-        <div className="bg-white p-6 rounded shadow-md">
-          <h3 className="text-xl font-semibold">Total Revenue</h3>
-          <p className="text-3xl font-bold text-green-500">$10,000</p>
+      {/* User Summary */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+        <div className="bg-white p-4 rounded shadow-md">
+          <h2 className="text-2xl font-semibold text-gray-700">Total Users</h2>
+          <p className="text-4xl font-bold text-blue-500">{totalUsers}</p>
         </div>
-        <div className="bg-white p-6 rounded shadow-md">
-          <h3 className="text-xl font-semibold">Active Users</h3>
-          <p className="text-3xl font-bold text-blue-500">1,200</p>
+        <div className="bg-white p-4 rounded shadow-md">
+          <h2 className="text-2xl font-semibold text-gray-700">Active Users</h2>
+          <p className="text-4xl font-bold text-green-500">{activeUsers}</p>
         </div>
-        <div className="bg-white p-6 rounded shadow-md">
-          <h3 className="text-xl font-semibold">New Orders</h3>
-          <p className="text-3xl font-bold text-purple-500">320</p>
-        </div>
-        <div className="bg-white p-6 rounded shadow-md">
-          <h3 className="text-xl font-semibold">Pending Issues</h3>
-          <p className="text-3xl font-bold text-red-500">15</p>
+        <div className="bg-white p-4 rounded shadow-md">
+          <h2 className="text-2xl font-semibold text-gray-700">Inactive Users</h2>
+          <p className="text-4xl font-bold text-red-500">{inactiveUsers}</p>
         </div>
       </div>
 
       {/* Charts Section */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* Pie Chart */}
         <div className="bg-white p-6 rounded shadow-md">
-          <h3 className="text-xl font-semibold mb-4">Sales Over Time</h3>
-          <LineChart data={lineChartData} />
+          <h2 className="text-xl font-semibold text-gray-700 mb-4">User Status Distribution</h2>
+          <Pie data={pieChartData} />
         </div>
-        <div className="bg-white p-6 rounded shadow-md">
-          <h3 className="text-xl font-semibold mb-4">Revenue by Category</h3>
-          <BarChart data={barChartData} />
-        </div>
-      </div>
-
-      <div className="bg-white p-6 rounded shadow-md">
-        <h3 className="text-xl font-semibold mb-4">User Demographics</h3>
-        <PieChart data={pieChartData} />
-      </div>
-
-      {/* Recent Activity Section */}
-      <div className="bg-white p-6 rounded shadow-md mt-6">
-        <h3 className="text-xl font-semibold mb-4">Recent Activity</h3>
-        <ul className="divide-y divide-gray-300">
-          <li className="py-2">
-            <p className="text-sm text-gray-600">Order #12345</p>
-            <p className="text-lg font-medium">John Doe purchased $500 worth of electronics.</p>
-          </li>
-          <li className="py-2">
-            <p className="text-sm text-gray-600">Order #12346</p>
-            <p className="text-lg font-medium">Jane Smith purchased $300 worth of furniture.</p>
-          </li>
-          <li className="py-2">
-            <p className="text-sm text-gray-600">Order #12347</p>
-            <p className="text-lg font-medium">Mike Johnson purchased $150 worth of groceries.</p>
-          </li>
-        </ul>
       </div>
     </div>
   );
